@@ -1,0 +1,7 @@
+[general]
+name=qgep
+qgisMinimumVersion=2.3
+description=A plugin for the waste water application QGEP
+author=Marco Hugentobler, Sourcepole AG
+email=marco at sourcepole dot ch
+version=0.1
