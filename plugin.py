@@ -19,6 +19,7 @@ class QgepPlugin:
         
         #add manhole action
         self.actionAddManhole = QAction('Add manhole',  None )
+        self.actionAddManhole.setCheckable( True )
         QObject.connect(self.actionAddManhole, SIGNAL('triggered()'), self.addManhole )
         self.toolBar.addAction( self.actionAddManhole )
         
@@ -32,7 +33,7 @@ class QgepPlugin:
         if enabled == True:
             
             #find the layer with name 'od_manhole'
-            layerList = QgsMapLayerRegistry.instance().mapLayersByName( 'od_manhole' );
+            layerList = QgsMapLayerRegistry.instance().mapLayersByName( 'manhole' );
             if len( layerList ) < 1:
                 QMessageBox.critical( None,  QApplication.translate( 'Error'),  QApplication.translate('Layer od_manhole not found') )
                 self.transaction = None
@@ -66,12 +67,17 @@ class QgepPlugin:
         self.mapToolAddManhole.setTransaction( self.transaction )
         
     def addLayersToTransaction(self):
-        manholeLayerList = QgsMapLayerRegistry.instance().mapLayersByName( 'od_manhole' );
-        if len( manholeLayerList ) > 0:
-            self.transaction.addLayer( manholeLayerList[0].id() )
-        coverLayerList = QgsMapLayerRegistry.instance().mapLayersByName( 'od_cover' );
-        if len( manholeLayerList ) > 0:
-            self.transaction.addLayer( coverLayerList[0].id() )
+	self.addLayerToTransaction( 'manhole')
+	self.addLayerToTransaction( 'cover' )
+	self.addLayerToTransaction( 'structure part' )
+	self.addLayerToTransaction( 'wastewater networkelement' )
+	self.addLayerToTransaction( 'wastewater structure' )
+	self.addLayerToTransaction( 'wastewater node' )
+            
+    def addLayerToTransaction( self, layerName ):
+	layerList = QgsMapLayerRegistry.instance().mapLayersByName( layerName )
+	if len(layerList) > 0:
+	    self.transaction.addLayer( layerList[0].id() )
 
     def addManhole(self):
         self.iface.mapCanvas().setMapTool( self.mapToolAddManhole )
