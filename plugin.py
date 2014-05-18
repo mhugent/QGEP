@@ -25,6 +25,9 @@ class QgepPlugin:
         
         #maptools
         self.mapToolAddManhole = QgsMapToolAddManhole( self.iface.mapCanvas() )
+        self.mapToolAddManhole.setAction( self.actionAddManhole )
+        
+        self.setActionsEnabled( False )
         
     def unload(self):
         del self.toolBar
@@ -49,6 +52,8 @@ class QgepPlugin:
                 QMessageBox.critical( None,  QApplication.translate( 'Plugin','Error'),  QApplication.translate('plugin','Transaction failed') )
                 self.transaction = None
             self.setTransactionToTools()
+            self.setActionsEnabled( True )
+            self.setTransactionLayersEditable( True )
         else:
             if self.transaction is None:
                 return
@@ -62,6 +67,13 @@ class QgepPlugin:
             del self.transaction
             self.transaction = None
             self.setTransactionToTools()
+            self.setActionsEnabled( False )
+            self.setTransactionLayersEditable( False )
+            
+	self.iface.mapCanvas().refresh()
+	
+    def setActionsEnabled( self, enabled ):
+      self.actionAddManhole.setEnabled( enabled )
             
     def setTransactionToTools(self ):
         self.mapToolAddManhole.setTransaction( self.transaction )
@@ -78,6 +90,25 @@ class QgepPlugin:
 	layerList = QgsMapLayerRegistry.instance().mapLayersByName( layerName )
 	if len(layerList) > 0:
 	    self.transaction.addLayer( layerList[0].id() )
+	    
+    def setTransactionLayersEditable( self, editable ):
+	#self.setLayerEditable( 'manhole', editable )
+	#self.setLayerEditable( 'cover', editable )
+	#self.setLayerEditable( 'structure part', editable )
+	#self.setLayerEditable( 'wastewater networkelement', editable )
+	self.setLayerEditable( 'wastewater structure', editable )
+	#self.setLayerEditable( 'wastewater node', editable )
+	
+    def setLayerEditable( self, layername, editable ):
+	layerList = QgsMapLayerRegistry.instance().mapLayersByName( layername )
+	if len( layerList ) < 1:
+	  return
+	layer = layerList[0]
+	if layer.type() == QgsMapLayer.VectorLayer:
+	  if editable:
+	    layer.startEditing()
+	  else:
+	    layer.rollBack()
 
     def addManhole(self):
         self.iface.mapCanvas().setMapTool( self.mapToolAddManhole )
